@@ -28,9 +28,7 @@ public class KeywordRanking {
 
         SparkConf sparkConf = new SparkConf()
                 .setAppName("StartingSpark")
-                .setMaster("local[*]")
-                .set("spark.authenticate", "true")
-                .set("spark.authenticate.secret", "some-big-secret");
+                .setMaster("local[*]");
 
         try (JavaSparkContext sparkContext = new JavaSparkContext(sparkConf)) {
             keywordRanking(sparkContext);
