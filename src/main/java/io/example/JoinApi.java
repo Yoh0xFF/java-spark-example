@@ -50,7 +50,20 @@ public class JoinApi {
             rightJoin(sparkContext);
 
             fullJoin(sparkContext);
+
+            cartesianJoin(sparkContext);
         }
+    }
+
+    private void cartesianJoin(JavaSparkContext sparkContext) {
+        System.out.println("\n\n---------------> cartesianJoin");
+
+        JavaPairRDD<Integer, Integer> visitsRdd = sparkContext.parallelizePairs(visitsRaw);
+        JavaPairRDD<Integer, String> usersRdd = sparkContext.parallelizePairs(usersRaw);
+
+        JavaPairRDD<Tuple2<Integer, Integer>, Tuple2<Integer, String>> joinedRdd
+                = visitsRdd.cartesian(usersRdd);
+        joinedRdd.collect().forEach(System.out::println);
     }
 
     private void fullJoin(JavaSparkContext sparkContext) {
