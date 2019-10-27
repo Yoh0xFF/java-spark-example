@@ -1,4 +1,4 @@
-package io.example;
+package io.example.rdd;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
@@ -58,7 +58,7 @@ class Util {
     private static final Set<String> boringWords = new HashSet<>();
 
     static {
-        try (InputStream is = Util.class.getResourceAsStream("subtitles/boring-words.txt")) {
+        try (InputStream is = Util.class.getResourceAsStream("/io/example/subtitles/boring-words.txt")) {
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             br.lines().forEach(boringWords::add);
         } catch (IOException ex) {
