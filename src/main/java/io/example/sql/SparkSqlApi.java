@@ -26,21 +26,35 @@ public class SparkSqlApi {
                     .option("header", true)
                     .csv("src/main/resources/io/example/exams/students.csv");
 
-            // showAndCountData(dataset);
+            showAndCountData(dataset);
 
-            // readingRow(dataset);
+            readingRow(dataset);
 
-            // filterWithExpression(dataset);
+            filterWithExpression(dataset);
 
-            // filterWithLambda(dataset);
+            filterWithLambda(dataset);
 
-            // filterWithColumn(dataset);
+            filterWithColumn(dataset);
 
             fullSqlSyntax(sparkSession, dataset);
+
+            grouping(sparkSession, dataset);
         }
     }
 
+    private void grouping(SparkSession sparkSession, Dataset<Row> dataset) {
+        System.out.println("\n\n---------------> grouping");
+
+        dataset.createOrReplaceTempView("my_students_view");
+
+        Dataset<Row> allSubjectGradeCounts = sparkSession.sql("select subject, count(1) as cnt from my_students_view " +
+                "group by subject order by subject asc");
+        allSubjectGradeCounts.show();
+    }
+
     private void fullSqlSyntax(SparkSession sparkSession, Dataset<Row> dataset) {
+        System.out.println("\n\n---------------> fullSqlSyntax");
+
         dataset.createOrReplaceTempView("my_students_view");
 
         Dataset<Row> mathResults = sparkSession.sql("select student_id, score, grade " +
