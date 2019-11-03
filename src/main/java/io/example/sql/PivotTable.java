@@ -49,6 +49,7 @@ public class PivotTable {
             results = results.groupBy(col("level")).pivot(col("month"), months).count().na().fill(0);
 
             results.show();
+            results.explain();
         }
     }
 }

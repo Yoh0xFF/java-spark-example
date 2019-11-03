@@ -52,6 +52,7 @@ public class LogFileGrouping {
         results = results.drop("monthnum");
 
         results.show();
+        results.explain();
     }
 
     private void sqlApi(SparkSession sparkSession, Dataset<Row> dataset) {
@@ -66,5 +67,6 @@ public class LogFileGrouping {
                         "order by cast(first(date_format(datetime, 'M')) as int), level");
 
         results.show();
+        results.explain();
     }
 }

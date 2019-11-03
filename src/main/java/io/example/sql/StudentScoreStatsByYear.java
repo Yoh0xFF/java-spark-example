@@ -29,13 +29,14 @@ public class StudentScoreStatsByYear {
                     .option("header", true)
                     .csv("src/main/resources/io/example/exams/students.csv");
 
-            dataset = dataset.groupBy(col("subject"))
+            Dataset<Row> results = dataset.groupBy(col("subject"))
                     .pivot(col("year"))
                     .agg(
                             round(avg(col("score")), 2).alias("avg_score"),
                             round(stddev(col("score")), 2).alias("stddev_score")
                     );
-            dataset.show();
+            results.show();
+            results.explain();
         }
     }
 }
