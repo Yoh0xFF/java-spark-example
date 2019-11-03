@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.types.DataTypes;
 
 import static org.apache.spark.sql.functions.*;
 
@@ -40,12 +41,47 @@ public class SparkSqlApi {
 
             groupingWithSql(sparkSession, dataset);
 
-            groupingWithDataframeApi(dataset);
+            groupingWithApi(dataset);
+
+            userDefinedFunctionWithSql(sparkSession, dataset);
+
+            userDefinedFunctionWithApi(sparkSession, dataset);
         }
     }
 
-    private void groupingWithDataframeApi(Dataset<Row> dataset) {
-        System.out.println("\n\n---------------> groupingWithDataframeApi");
+    private void userDefinedFunctionWithApi(SparkSession sparkSession, Dataset<Row> dataset) {
+        System.out.println("\n\n---------------> userDefinedFunctionWithApi");
+
+        sparkSession.udf().register("hasPassed", (String grade, String subject) -> {
+            if ("Biology".equals(subject)) {
+                return grade.startsWith("A");
+            }
+            return grade.startsWith("A") || grade.startsWith("B") || grade.startsWith("C");
+        }, DataTypes.BooleanType);
+
+        dataset = dataset.withColumn("paas", callUDF("hasPassed", col("grade"), col("subject")));
+        dataset.show();
+    }
+
+    private void userDefinedFunctionWithSql(SparkSession sparkSession, Dataset<Row> dataset) {
+        System.out.println("\n\n---------------> userDefinedFunctionWithSql");
+
+        dataset.createOrReplaceTempView("my_students_view");
+
+        sparkSession.udf().register("hasPassed", (String grade, String subject) -> {
+            if ("Biology".equals(subject)) {
+                return grade.startsWith("A");
+            }
+            return grade.startsWith("A") || grade.startsWith("B") || grade.startsWith("C");
+        }, DataTypes.BooleanType);
+
+        dataset = sparkSession
+                .sql("select subject, grade, hasPassed(grade, subject) as cnt from my_students_view");
+        dataset.show();
+    }
+
+    private void groupingWithApi(Dataset<Row> dataset) {
+        System.out.println("\n\n---------------> groupingWithApi");
 
         dataset = dataset.groupBy(col("subject")).agg(
                 max(col("score")).alias("max_score"),
@@ -60,10 +96,10 @@ public class SparkSqlApi {
 
         dataset.createOrReplaceTempView("my_students_view");
 
-        Dataset<Row> allSubjectGradeCounts = sparkSession
+        dataset = sparkSession
                 .sql("select subject, count(1) as cnt from my_students_view " +
                         "group by subject order by subject asc");
-        allSubjectGradeCounts.show();
+        dataset.show();
     }
 
     private void fullSqlSyntax(SparkSession sparkSession, Dataset<Row> dataset) {
@@ -71,36 +107,38 @@ public class SparkSqlApi {
 
         dataset.createOrReplaceTempView("my_students_view");
 
-        Dataset<Row> mathResults = sparkSession.sql("select student_id, score, grade " +
-                "from my_students_view where subject = 'Math' and year = 2005 " +
-                "order by student_id desc");
+        Dataset<Row> mathResults = sparkSession
+                .sql("select student_id, score, grade " +
+                        "from my_students_view where subject = 'Math' and year = 2005 " +
+                        "order by student_id desc");
         mathResults.show();
 
-        Dataset<Row> allSubjectResults = sparkSession.sql("select distinct(subject) from my_students_view " +
-                "order by subject asc");
+        Dataset<Row> allSubjectResults = sparkSession
+                .sql("select distinct(subject) from my_students_view " +
+                        "order by subject asc");
         allSubjectResults.show();
     }
 
     private void filterWithColumn(Dataset<Row> dataset) {
         System.out.println("\n\n---------------> filterWithColumn");
 
-        Dataset<Row> mathResults = dataset.filter(col("subject").equalTo("Math").and(col("year").equalTo(2005)));
-        mathResults.show();
+        dataset = dataset.filter(col("subject").equalTo("Math").and(col("year").equalTo(2005)));
+        dataset.show();
     }
 
     private void filterWithLambda(Dataset<Row> dataset) {
         System.out.println("\n\n---------------> filterWithLambda");
 
-        Dataset<Row> mathResults = dataset.filter(row ->
+        dataset = dataset.filter(row ->
                 row.getAs("subject").equals("Math") && Integer.parseInt(row.getAs("year")) == 2005);
-        mathResults.show();
+        dataset.show();
     }
 
     private void filterWithExpression(Dataset<Row> dataset) {
         System.out.println("\n\n---------------> filterWithExpression");
 
-        Dataset<Row> mathResults = dataset.filter("subject = 'Math' and year = 2005");
-        mathResults.show();
+        dataset = dataset.filter("subject = 'Math' and year = 2005");
+        dataset.show();
     }
 
     private void readingRow(Dataset<Row> dataset) {
@@ -117,6 +155,6 @@ public class SparkSqlApi {
         System.out.println("\n\n---------------> showAndCountData");
 
         dataset.show();
-        System.out.printf("There are " + dataset.count() + " rows");
+        System.out.println("There are " + dataset.count() + " rows");
     }
 }
