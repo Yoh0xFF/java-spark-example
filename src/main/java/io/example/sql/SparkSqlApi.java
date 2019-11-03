@@ -38,17 +38,31 @@ public class SparkSqlApi {
 
             fullSqlSyntax(sparkSession, dataset);
 
-            grouping(sparkSession, dataset);
+            groupingWithSql(sparkSession, dataset);
+
+            groupingWithDataframeApi(dataset);
         }
     }
 
-    private void grouping(SparkSession sparkSession, Dataset<Row> dataset) {
-        System.out.println("\n\n---------------> grouping");
+    private void groupingWithDataframeApi(Dataset<Row> dataset) {
+        System.out.println("\n\n---------------> groupingWithDataframeApi");
+
+        dataset = dataset.groupBy(col("subject")).agg(
+                max(col("score")).alias("max_score"),
+                min(col("score")).alias("min_score"),
+                avg(col("score")).alias("avg_score")
+        );
+        dataset.show();
+    }
+
+    private void groupingWithSql(SparkSession sparkSession, Dataset<Row> dataset) {
+        System.out.println("\n\n---------------> groupingWithSql");
 
         dataset.createOrReplaceTempView("my_students_view");
 
-        Dataset<Row> allSubjectGradeCounts = sparkSession.sql("select subject, count(1) as cnt from my_students_view " +
-                "group by subject order by subject asc");
+        Dataset<Row> allSubjectGradeCounts = sparkSession
+                .sql("select subject, count(1) as cnt from my_students_view " +
+                        "group by subject order by subject asc");
         allSubjectGradeCounts.show();
     }
 
