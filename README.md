@@ -2,12 +2,12 @@
 
 Sample project demonstrating Spark usage with Java
 
-* rdd - examples using Resilient Distributed DataSets
+* **rdd** - examples using Resilient Distributed DataSets
     * **BasicApi** - Demonstrates usage of the basic rdd api
     * **JoinApi** - Demonstrates usage of the join rdd api
     * **KeyworkRanking** - Find most frequently used words in text
     * **TopCoursesByViews** - Find top courses by views
-* sql - examples using Spark Sql
+* **sql** - examples using Spark Sql
     * **InMemoryData** - Demonstrate creation of the in-memory data 
     * **LogFileGrouping** - Group log entries by type
     * **PivotTable** - Demonstrate creation of the pivot table
