@@ -41,9 +41,12 @@ public class LogFileGrouping {
 
         Dataset<Row> results;
 
-        results = dataset.select(col("level"),
+        results = dataset.select(
+                col("level"),
                 date_format(col("datetime"), "MMMM").alias("month"),
-                date_format(col("datetime"), "M").alias("monthnum").cast(DataTypes.IntegerType));
+                date_format(col("datetime"), "M").alias("monthnum").cast(DataTypes.IntegerType)
+        );
+
         results = results.groupBy(col("level"), col("month"), col("monthnum")).count();
         results = results.orderBy(col("monthnum"), col("level"));
         results = results.drop("monthnum");
